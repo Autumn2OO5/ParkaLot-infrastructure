@@ -5,7 +5,7 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                withCredentials([file(credentialsId: 'jenkins-pem', variable: 'SSH_KEY')]) {
+                withCredentials([file(credentialsId: 'jenkins-server.pem', variable: 'SSH_KEY')]) {
                     sh '''
                     chmod 400 $SSH_KEY
 
