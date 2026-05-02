@@ -47,19 +47,11 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
               #!/bin/bash
               apt-get update
-              apt-get install -y docker.io git
+              apt-get install -y docker.io
               systemctl start docker
               systemctl enable docker
               usermod -a -G docker ubuntu
-
-              # Clone the repo and build the app image automatically
-              rm -rf /home/ubuntu/app
-              git clone https://github.com/Autumn2OO5/ParkalotGDSC.git /home/ubuntu/app
-              chown -R ubuntu:ubuntu /home/ubuntu/app
-              cd /home/ubuntu/app
-
-              docker build -t parkalot-web-app .
-              docker run -d -p 3001:3001 --name web-app parkalot-web-app
+              
               EOF
 
   tags = {

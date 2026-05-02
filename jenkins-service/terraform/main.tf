@@ -46,7 +46,7 @@ resource "aws_security_group" "jenkins_sg" {
 
 resource "aws_instance" "jenkins" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
+  instance_type = "t3.micro"
   key_name      = "jenkins-server"
 
   security_groups = [aws_security_group.jenkins_sg.name]

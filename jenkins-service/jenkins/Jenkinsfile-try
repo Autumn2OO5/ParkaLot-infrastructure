@@ -1,51 +1,43 @@
-pipeline {
+CODE_CHANGES = getGitChanges()
+pipeline{
     agent any
 
-    environment {
-        IMAGE_NAME = 'parkalot-web-app'
-        CONTAINER_NAME = 'web-app'
-        APP_PORT = '3001'
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
+    stages{
+        stage('build'){
+            when{
+                expression {
+                    BRANCH_NAME == 'main' && CODE
+                }
+            }
+            steps{
+                echo 'building the application'
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                    docker build -t ${IMAGE_NAME} .
-                '''
+        stage('test'){
+            when {
+                expression {
+                    BRANCH_NAME == 'main' 
+                }
+            }
+            steps{
+                echo 'testing the application'
             }
         }
-
-        stage('Deploy Container') {
-            steps {
-                sh '''
-                    if docker ps -q -f name=${CONTAINER_NAME}; then
-                        docker stop ${CONTAINER_NAME}
-                    fi
-                    if docker ps -a -q -f name=${CONTAINER_NAME}; then
-                        docker rm ${CONTAINER_NAME}
-                    fi
-                    docker run -d -p ${APP_PORT}:${APP_PORT} --name ${CONTAINER_NAME} ${IMAGE_NAME}
-                '''
+        stage('deploy'){
+            steps{
+                echo 'deploying the application'
             }
         }
     }
-
     post {
-        always {
-            echo 'Pipeline finished.'
+        always{
+            echo 'this will always execute'
         }
-        success {
-            echo "Application deployed and available on port ${APP_PORT}."
+        success{
+            echo 'this will execute only if  the pipeline is successful'
         }
-        failure {
-            echo 'Build or deployment failed. Check the console output for details.'
+        failure{
+            echo 'this will execute only if the pipeline fails'
         }
     }
 }
