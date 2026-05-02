@@ -2,35 +2,32 @@ pipeline {
     agent any
 
     stages {
-
         stage('Deploy to EC2') {
             steps {
-                withCredentials([file(credentialsId: '66d871b4-0e0f-4b24-ad48-12c1a66408ab', variable: 'SSH_KEY')]) {
+                withCredentials([file(credentialsId: 'jenkins-pem', variable: 'SSH_KEY')]) {
                     sh '''
-                    chmod 400 $SSH_KEY
+chmod 400 $SSH_KEY
 
-                    ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@34.201.72.126 << 'EOF'
+ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@34.201.72.126 << 'EOF'
+if [ ! -d "/home/ubuntu/ParkalotGDSC" ]; then
+    git clone https://github.com/Autumn2OO5/ParkalotGDSC.git /home/ubuntu/ParkalotGDSC
+fi
 
-                    if [ ! -d "~/ParkalotGDSC" ]; then
-                        git clone https://github.com/Autumn2OO5/ParkalotGDSC.git ~/ParkalotGDSC
-                    fi
+cd /home/ubuntu/ParkalotGDSC
+git pull origin main
 
-                    cd ~/ParkalotGDSC
-                    git pull origin main
+docker stop parkalot-container || true
+docker rm parkalot-container || true
 
-                    docker stop parkalot-container || true
-                    docker rm parkalot-container || true
+docker build -t parkalot-app .
 
-                    docker build -t parkalot-app .
-
-                    docker run -d \
-                        --name parkalot-container \
-                        -p 3001:3001 \
-                        parkalot-app \
-                        npm run dev
-
-                    EOF
-                    '''
+docker run -d \
+  --name parkalot-container \
+  -p 3001:3001 \
+  parkalot-app \
+  npm run frontend:dev
+EOF
+'''
                 }
             }
         }
